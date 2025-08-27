@@ -1,16 +1,15 @@
 const { Inngest } = require("inngest");
-const connectDB = require("../configs/db");   // ensure reusable connection
+const connectDB = require("../configs/db");
 const User = require("../models/User");
 
-// Create a client
 const inngest = new Inngest({ id: "movie-ticket-booking" });
 
 // Create user
 const syncUserCreation = inngest.createFunction(
   { id: "sync-user-from-clerk" },
-  { event: "clerk/user.created" },
+  { event: "clerk/user.created" },   // ✅ FIXED
   async ({ event }) => {
-    await connectDB();   // ensure DB ready for serverless
+    await connectDB();
 
     const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
@@ -29,7 +28,7 @@ const syncUserCreation = inngest.createFunction(
 // Delete user
 const syncUserDeletion = inngest.createFunction(
   { id: "delete-user-with-clerk" },
-  { event: "clerk/user.deleted" },
+  { event: "clerk/user.deleted" },   // ✅ FIXED
   async ({ event }) => {
     await connectDB();
 
@@ -42,7 +41,7 @@ const syncUserDeletion = inngest.createFunction(
 // Update user
 const syncUserUpdation = inngest.createFunction(
   { id: "update-user-from-clerk" },
-  { event: "clerk/user.updated" },
+  { event: "clerk/user.updated" },   // ✅ FIXED
   async ({ event }) => {
     await connectDB();
 
