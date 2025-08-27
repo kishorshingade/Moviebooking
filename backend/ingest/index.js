@@ -1,63 +1,58 @@
-const { Inngest } = require("inngest");
-const connectDB = require("../configs/db");
-const User = require("../models/User");
+import { Inngest } from "inngest";
+import User from "../models/User";
+export const inngest = new Inngest({ id: "movie-tiket-booking" });
 
-const inngest = new Inngest({ id: "movie-ticket-booking" });
-
+//inngest function to save user data to database
 const syncUserCreation = inngest.createFunction(
-  { id: "sync-user-from-clerk" },
-  { event: "user.created" }, // ✅ matches Clerk log
-  async ({ event }) => {
-    await connectDB();
-
-    const { id, first_name, last_name, email_addresses, image_url } =
-      event.data;
-
-    const userData = {
+  {id: 'sync-user-from-clerk'},
+  {event: 'cleark/user.created'},
+  async({ event }) =>{
+     const {id, first_name, last_name, email_addresses, image_url} = event.data
+     const userData = {
       _id: id,
-      email: email_addresses[0]?.email_address,
-      name: `${first_name} ${last_name}`,
-      image: image_url,
-    };
+      email: email_addresses[0].email_address,
+      name: first_name + ' ' + last_name,
+      image: image_url
 
-    await User.create(userData);
-    console.log("✅ User created:", userData);
+     }
+     await User.create(userData)
   }
-);
+)
+
+//inngest function to delete data from database
 
 const syncUserDeletion = inngest.createFunction(
-  { id: "delete-user-with-clerk" },
-  { event: "user.deleted" }, // ✅ matches Clerk log
-  async ({ event }) => {
-    await connectDB();
-
-    const { id } = event.data;
-    await User.findByIdAndDelete(id);
-    console.log("🗑️ User deleted:", id);
+  {id: 'delete-user-with-clerk'},
+  {event: 'cleark/user.deleted'},
+  async({ event }) =>{
+    const {id} = event.data
+    await User.findByIdAndDelete(id)
   }
-);
+)
+
+
+//inngest function to Update data from database
 
 const syncUserUpdation = inngest.createFunction(
-  { id: "update-user-from-clerk" },
-  { event: "user.updated" }, // ✅ matches Clerk log
-  async ({ event }) => {
-    await connectDB();
-
-    const { id, first_name, last_name, email_addresses, image_url } =
-      event.data;
-
+  {id: 'update-user-from-clerk'},
+  {event: 'cleark/user.updated'},
+  async({ event }) =>{
+    const {id, first_name, last_name, email_addresses, image_url} = event.data
     const userData = {
       _id: id,
-      email: email_addresses[0]?.email_address,
-      name: `${first_name} ${last_name}`,
-      image: image_url,
-    };
+      email: email_addresses[0].email_address,
+      name: first_name + ' ' + last_name,
+      image: image_url
 
-    await User.findByIdAndUpdate(id, userData, { new: true, upsert: true });
-    console.log("♻️ User updated:", userData);
+     }
+     await User.findByIdAndUpdate(id,userData)
   }
-);
+)
 
-const functions = [syncUserCreation, syncUserDeletion, syncUserUpdation];
 
-module.exports = { inngest, functions };
+
+export const functions = [
+  syncUserCreation,
+  syncUserUpdation,
+  syncUserDeletion
+];
