@@ -1,3 +1,4 @@
+// inngest.js
 import { Inngest } from "inngest";
 import User from "../models/User.js"; // Your Mongoose model
 
@@ -13,15 +14,13 @@ const syncUserCreation = inngest.createFunction(
     try {
       const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
-      // Prepare user data for database
       const userData = {
-        _id: id, // Use Clerk user ID as MongoDB _id (ensure your schema allows string)
+        _id: id,
         email: email_addresses?.[0]?.email_address || "",
         name: `${first_name} ${last_name}`,
         image: image_url || ""
       };
 
-      // Save to MongoDB
       const newUser = await User.create(userData);
       console.log("✅ User created in DB:", newUser);
     } catch (err) {
@@ -46,7 +45,6 @@ const syncUserUpdation = inngest.createFunction(
         image: image_url || ""
       };
 
-      // Update existing user in DB
       const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
       console.log("✅ User updated in DB:", updatedUser);
     } catch (err) {
@@ -65,7 +63,6 @@ const syncUserDeletion = inngest.createFunction(
     try {
       const { id } = event.data;
 
-      // Delete user from DB
       const deletedUser = await User.findByIdAndDelete(id);
       console.log("✅ User deleted from DB:", deletedUser);
     } catch (err) {
@@ -74,9 +71,20 @@ const syncUserDeletion = inngest.createFunction(
   }
 );
 
-// Export all functions
+// ---------------------
+// Optional: Wildcard test for debugging
+// ---------------------
+const testFn = inngest.createFunction(
+  { id: 'test-all-events' },
+  { event: '*' },
+  async ({ event }) => {
+    console.log("Event received:", event);
+  }
+);
+
 export const functions = [
   syncUserCreation,
   syncUserUpdation,
-  syncUserDeletion
+  syncUserDeletion,
+  testFn
 ];
