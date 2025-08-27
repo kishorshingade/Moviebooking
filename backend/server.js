@@ -26,6 +26,8 @@ app.get('/', (req, res) => {
 // inngest routes
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
+
+
 // Start server (only if running locally, not on vercel)
 if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
