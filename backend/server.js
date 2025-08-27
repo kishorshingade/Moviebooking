@@ -1,38 +1,38 @@
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./configs/db');
+const express = require("express");
+const cors = require("cors");
+const connectDB = require("./configs/db");
+require("dotenv").config();
 
 const { clerkMiddleware } = require("@clerk/express");
 const { serve } = require("inngest/express");
-const { inngest, functions } = require("./ingest/index");
-require('dotenv').config();
+const { inngest, functions } = require("./ingest");
 
+// init express
 const app = express();
-const port = process.env.PORT || 3000; // dynamic for local + vercel
-
-// connect to MongoDB
-connectDB();
 
 // middleware
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 
-// API routes
-app.get('/', (req, res) => {  
-   res.send("Hello from Express 🚀");
+// connect Mongo only once
+connectDB();
+
+// health check
+app.get("/", (req, res) => {
+  res.send("Hello from Express 🚀");
 });
 
-// inngest routes
+// inngest endpoint
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-
-
-// Start server (only if running locally, not on vercel)
+// ✅ local server only (not for Vercel)
 if (process.env.NODE_ENV !== "production") {
+  const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
   });
 }
 
-module.exports = app; // required for vercel
+// ✅ IMPORTANT: export app for Vercel
+module.exports = app;
