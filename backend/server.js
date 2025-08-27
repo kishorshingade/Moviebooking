@@ -8,32 +8,29 @@ const { inngest, functions } = require("./ingest/index");
 require('dotenv').config();
 
 const app = express();
+const port = process.env.PORT || 3000; // dynamic for local + vercel
 
-// Connect to DB
+// connect to MongoDB
 connectDB();
 
-// Middleware
+// middleware
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 
-// Routes
-app.get('/', (req, res) => {
-  res.send("Hello from Express 🚀");
+// API routes
+app.get('/', (req, res) => {  
+   res.send("Hello from Express 🚀");
 });
 
+// inngest routes
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-// ✅ Run locally with app.listen()
-// ✅ Export app for Vercel
-if (require.main === module) {
-  // Running directly: node server.js
-  const host = "localhost";
-  const port = process.env.PORT || 3000;
-  app.listen(port, host, () => {
-    console.log(`Server started locally at http://${host}:${port}`);
+// Start server (only if running locally, not on vercel)
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    console.log(`Server started at http://localhost:${port}`);
   });
-} else {
-  // Required by Vercel
-  module.exports = app;
 }
+
+module.exports = app; // required for vercel
