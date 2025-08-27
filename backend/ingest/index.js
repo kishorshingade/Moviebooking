@@ -1,5 +1,5 @@
 import { Inngest } from "inngest";
-import User from "../models/User";
+import User from "../models/User.js";
 export const inngest = new Inngest({ id: "movie-tiket-booking" });
 
 //inngest function to save user data to database
